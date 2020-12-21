@@ -8,7 +8,7 @@
   <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
   <meta name="generator" content="Jekyll v3.8.5">
 
-  <title>商品列表 ｜ NCU MIS SA</title>
+  <title> 郵輪列表 ｜ NCU MIS SA</title>
 
   <!-- Bootstrap core CSS -->
   <link href="statics/css/bootstrap.min.css" rel="stylesheet">
@@ -43,15 +43,15 @@
     <h5 class="my-0 mr-md-auto font-weight-normal">NCU_MIS-SA</h5>
     <nav class="my-2 my-md-0 mr-md-3">
       <a class="p-2 text-dark" href="index.html">會員管理模組</a>
-      <a class="p-2 text-dark" href="product.html">商品列表</a>
+      <a class="p-2 text-dark" href="product.html">郵輪班次列表</a>
       <a class="p-2 text-dark" href="order.html">訂單列表</a>
     </nav>
     <a class="btn btn-outline-primary" href="cart.html">購物車</a>
   </div>
 
   <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-    <h1 class="display-4">商品列表</h1>
-    <p class="lead">以下是所有商品包含其ID、品名、價格與說明</p>
+    <h1 class="display-4">郵輪班次列表</h1>
+    <p class="lead">以下是所有郵輪包含其ID、名稱、價格與說明</p>
   </div>
 
   <div class="album py-5 bg-light">
@@ -100,10 +100,9 @@
    		inner_html += '<h4 class="font-weight-normal text-center text-truncate">' + data.name + '</h4>';
  		inner_html += '</div>';
  		inner_html += '<div class="card mb-4 shadow-sm">';
- 		inner_html += '<img src="statics/img/product/' + data.image + '" width="100%">';
+ 		inner_html += '<a href="status.html"><img src="statics/img/product' + data.image + '" width ="100%"/></a>';
 		inner_html += '<div class="card-body">';
 		inner_html += '<h1 class="card-title pricing-card-title">$' + data.price + ' <small class="text-muted">/ USD</small></h1>';
-		inner_html += '<p class="card-text">' + data.describe + '</p>';
 		inner_html += '<div class="d-flex justify-content-between align-items-center">';
 		inner_html += '<div class="btn-group">';
 		inner_html += '<button id="add_cart_' + data.id + '" name="add_cart" type="button" class="btn btn-lg btn-block btn-outline-primary">加入購物車</button>';
@@ -171,6 +170,35 @@
     	    $('#' + id).removeClass('disabled');
     	    $('#' + id).html('加入購物車');
     	}
+    }
+    
+    function updateHTML(data) {
+  	  var inner_html = '';
+  	  var temp = '';
+  	  
+  	  $.each(data, function (key, value) {
+  		  var total_price = Big(0.0);
+  		  $.each(value['product_info'], function (k, v) {
+  			  total_price = total_price.plus(v['subtotal'])
+  		  });
+  		  
+  		  temp = '<div class="col-md-6">';
+  		  temp += '<div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">';
+  		  temp += '<div class="col p-4 d-flex flex-column position-static">';
+  		  temp += '<strong class="d-inline-block mb-2 text-primary">訂單編號：#' + value['order_info']['id'] + '</strong>';
+  		  temp += '<h3 class="mb-0"><span class="p-2">' + value['order_info']['last_name'] + '</span>';
+  		  temp += '<span>' + value['order_info']['first_name'] + '</span></h3>';
+  		  temp += '<hr/>';
+  		  temp += '<div class="mb-1 text-muted">建立時間：' + value['order_info']['create'] + '</div>';
+  		  temp += '<div class="mb-1 text-muted">修改時間：' + value['order_info']['modify'] + '</div>';
+  		  temp += '<p class="card-text mb-auto">總價：$ ' + total_price + '</p>';
+  		  temp += '<a href="order_detail.html?id=' + value['order_info']['id'] + '" class="stretched-link">詳細資料</a>';
+  		  temp += '</div></div></div>';
+  		  inner_html = temp + inner_html;
+  	  });
+  	  
+  	  $('#order_panel').append(inner_html);
+  	  
     }
   </script>
 
