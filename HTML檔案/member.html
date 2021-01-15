@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>會員清單 | THIRTEEN旅遊</title>
+    <link rel="stylesheet" type="text/css" href="statics/css/cake.generic.css">
+	<link href="statics/css/bootstrap.min.css" rel="stylesheet">
+	<script type="text/javascript" src="statics/js/snowstorm.js"></script>
+    <script src="statics/js/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+    	//放在head等於load的時候就執行
+    	if (document.cookie.indexOf('memberlogin=valid') < 0) { //<0意思為不存在
+    		alert("請先登入會員！");
+    		location.href = "login.html"; //If user has not authenticated, sent back to this page
+    	}
+    	
+    </script>
+</head>
+<style>
+    .upper-color{
+    	background-color: #FFDAB9;
+    }
+    
+	.cart-color{
+    	background-color: #FFFFFF;
+    }
+    .font-color{
+    	color: #2828FF;
+    }
+    .p-2{
+		font-size: 20px;
+		font-weight:normal;
+	}
+	
+	.btn{
+		font-size: 20px;
+	}
+	
+	.bodybg{
+		background-image: url('statics/img/Caribbean-beach.jpg')
+	}
+  </style>
+<body class="bodybg">
+	<div class="d-flex upper-color flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 border-bottom shadow-sm">
+    	<h3 class="my-0 mr-md-auto font-weight-bold"><a class="font-color" href="index.html" style="text-decoration: none">THIRTEEN旅遊</a></h3>
+    	<nav class="my-2 my-md-0 mr-md-3">
+      		<a class="p-2 text-dark" href="member.html">會員清單</a> 
+      		<a class="p-2 text-dark" href="cruises.html">郵輪行程</a>
+      		<a class="p-2 text-dark" href="spots.html">景點</a>
+      		<a class="p-2 text-dark" href="order.html">訂單</a>
+    	</nav>
+    	<a class="btn cart-color btn-outline-primary" href="cart.html">購物車</a>
+  	</div>
+  
+    <div id="container">
+        <div id="content">
+            <h2>會員清單</h2>
+            <input type="button" value="登出會員" id="logOut" onclick="eraseCookie()">
+
+            <div id="flashMessage" class="message" style="display: none;"></div>
+
+            <table id="table">
+                <thead>
+                    <tr>
+                        <th>編號</th>
+                        <th>姓名</th>
+                        <th>email</th>
+                        <th>phone</th>
+                        <th>功能</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <script type="text/javascript">
+            	$(document).ready(function() {  //document ready的話呼叫 getAllMember
+                	getAllMember();  //108定義
+            	});
+                // 全域變數紀錄SQL指令下的次數
+                var sql_num = 0;
+                
+                function deleteMember(id) {  //141呼叫到  //這邊還沒有id輸入，因此先跳過這個function
+                    var check = window.confirm("確認刪除會員？");  //提示彈出
+                    if (check == true) {   
+                        console.log("You pressed OK!");
+                        var request = {'id': id};
+                        var data_string = JSON.stringify(request);  //把上一行request轉成JSON
+                        $.ajax({   
+                            type: "DELETE",
+                            url: "api/member.do",  //membercontroller的doDelete
+                            crossDomain: true,
+                            data: data_string,
+                            cache: false,
+                            dataType: 'json',
+                            timeout: 5000,
+                            success: function (response) {
+                                if(response.status == 200){
+                                    $("#flashMessage").html("成功! 已經成功刪除會員...");
+                                    $("#flashMessage").show();
+                                    getAllMember();  //109定義，刪除成功後列出剩下會員
+                                }
+                                console.log(response);
+                            },
+                            error: function () {
+                                alert("無法連線到伺服器！");
+                            }
+                        });
+                    }
+                    else {
+                        console.log("You pressed Cancel!");
+                    }
+                }
+
+                function getAllMember() {   //72,95呼叫
+                    // 發出POST的GET請求取得所有會員列表
+                    $.ajax({      //呼叫ajax(呼叫http:get,post...) 
+                            type: "GET",  //從伺服器撈資料
+                            url: "api/member.do",  //網址對應到member controller 的 doGet
+                            crossDomain: true,
+                            cache: false,
+                            dataType: 'json',
+                            timeout: 5000,
+                            success: function (response) {  //if 呼叫http成功 得到response
+                                if(response.status == 200){
+                                    updateTable(response.response.data);  //132定義
+                                }
+                                console.log(response);  //console.log(data)可列印任何型態的data(陣列,字串...)
+                            },
+                            error: function () {
+                                alert("無法連線到伺服器！");
+                            }
+                    });
+                }
+                
+                // 更新會員列表表格
+                function updateTable(data) {  //getAllmember中呼叫
+                    $("#table > tbody").empty();
+                    var table_html = '';
+                    $.each(data, function(index, value) {  //for each data (看jsn傳回來幾組)，1組就是1個陣列[]
+                        table_html += '<tr><td scope="row">' + value['id'] + '</td>';
+                        table_html += '<td>' + value['name'] + '</td>';  //取陣列，填成html的table
+                        table_html += '<td>' + value['email'] + '</td>';
+                        table_html += '<td>' + value['phone'] + '</td>';
+                        table_html += '<td>' + '<a href="edit.html?id=' + value['id'] + '">編輯</a> | '; //編輯超連結到edit.html
+                        table_html += '<a href="javascript: deleteMember(' + value['id'] + ');">刪除</a></td></tr>'; //deletemember 在77定義(呼叫membercontrroller的doDelete)
+                    })
+
+                    $("#table > tbody").append(table_html);
+                }
+                
+                function eraseCookie() {
+                	//新建cookie取代舊的，將expire日期的時間-1，memberlogin的value設空值，即可視為登出
+        			createCookie('memberlogin','',-1);  
+        			window.location.href= "login.html";
+        		}
+        		
+                function createCookie(name,value,days) {
+        			if (days) {
+        				var date = new Date();
+        				date.setTime(date.getTime()+(days*24*60*60*1000));
+        				var expires = "; expires="+date.toGMTString();
+        			}
+        			else var expires = "";
+        			document.cookie = name+"="+value+expires+"; path=/";
+        		}
+            </script>
+        </div>
+        <footer>
+    <div class="container">
+      <p class="float-right">
+        <a href="#">Back to top</a>
+      </p>
+    	 <p>Thank you for visiting our web site!</p>
+         <p>Contact us: <font color="blue"><a href="mailto:thirteen.with.u@gmail.com">thirteen.with.u@gmail.com</a></font> </p>
+      </div>
+  		</footer>
+    </div>
+ 
+</body>
+
+</html>

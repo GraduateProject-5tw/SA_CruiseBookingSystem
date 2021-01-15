@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Login | THIRTEEN旅遊</title>
+    <link href="statics/icon/favicon.ico" type="image/x-icon" rel="icon">
+    <link href="statics/icon/favicon.ico" type="image/x-icon" rel="shortcut icon">
+    <link rel="stylesheet" type="text/css" href="statics/css/cake.generic.css">
+    <link href="statics/css/bootstrap.min.css" rel="stylesheet">
+    <script src="statics/js/jquery-3.4.1.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="statics/js/snowstorm.js"></script>
+</head>
+<style>
+    .upper-color{
+    	background-color: #FFDAB9;
+    }
+    
+	.cart-color{
+    	background-color: #FFFFFF;
+    }
+    .font-color{
+    	color: #2828FF;
+    }
+    .p-2{
+		font-size: 20px;
+		font-weight:normal;
+	}
+	
+	.btn{
+		font-size: 20px;
+	}
+	.bodybg{
+		background-image: url('statics/img/Caribbean-beach.jpg')
+	}
+	
+  </style>
+<body class="bodybg">
+	<div class="d-flex upper-color flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 border-bottom shadow-sm">
+    	<h3 class="my-0 mr-md-auto font-weight-bold"><a class="font-color" href="index.html" style="text-decoration: none">THIRTEEN旅遊</a></h3>
+    	<nav class="my-2 my-md-0 mr-md-3">
+      		<a class="p-2 text-dark" href="member.html">會員清單</a> 
+      		<a class="p-2 text-dark" href="cruises.html">郵輪行程</a>
+      		<a class="p-2 text-dark" href="spots.html">景點</a>
+      		<a class="p-2 text-dark" href="order.html">訂單</a>
+    	</nav>
+    	<a class="btn cart-color btn-outline-primary" href="cart.html">購物車</a>
+  	</div>
+    <div id="container" >
+        <div id="content">
+            <h2>登入會員</h2>
+            還未加入會員嗎？<a href="register.html">註冊會員</a>
+            <div id="flashMessage" class="message" style="display: none;"></div>
+            <form id="form" accept-charset="utf-8">
+                <div style="display:none;"><input type="hidden" name="_method" value="GET"></div>
+                <div class="input email required">
+                    <label for="member_email">email</label>
+                    <input name="email" maxlength="50" type="email" id="member_email" required="required">
+                </div>
+                <div class="input password required">
+                    <label for="member_password">密碼</label>
+                    <input name="password" maxlength="30" type="password" id="member_password" required="required">
+                </div>
+                <div class="submit"><input type="button" value="登入" id="submit"></div>
+            </form>
+            
+            <script type="text/javascript">
+
+                $(document).ready(function() {
+                    // 處理表單點擊事件
+                    var $form = $('#submit');
+                    $form.click(function() {
+                        submit();
+                    });
+
+                    function submit() {
+                        var email = $('#member_email').val();
+                        var password = $('#member_password').val();
+                        
+                        var email_rule = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
+                        var password_rule = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+                        
+                        if (!email_rule.test(email)) {
+                            alert("Email格式不符！");
+                        }
+                        else {
+                            // 將資料組成JSON格式
+                            var data_object = {
+                                "email": email,
+                                "password": password
+                            };
+
+                            // 將JSON格式轉換成字串
+                            var data_string = JSON.stringify(data_object);
+                            // 發出POST的AJAX請求
+                            $.ajax({
+                                    type: "POST",
+                                    url : "LoginController",
+                                    data: data_string,
+                                    crossDomain: true,
+                                    cache: false,
+                                    dataType: 'json',
+                                    timeout: 5000,
+                                    success: function (response) {
+                                    	document.getElementById('member_password').value='';
+                                        document.getElementById('member_email').value='';
+                                        $('#flashMessage').html(response.message);
+                                        $('#flashMessage').show();
+                                        
+                                        if(response.message == "成功登入！"){
+                                            window.location.href='cookie.html';
+                                        }
+                                    },
+                                    error: function () {
+                                    	alert("無法連線到伺服器！");
+                                    }
+                            });
+                        }
+                    }
+                });
+            </script>
+        </div>
+
+        <footer>
+    <div class="container">
+      <p class="float-right">
+        <a href="#">Back to top</a>
+      </p>
+    	 <p>Thank you for visiting our web site!</p>
+         <p>Contact us: <font color="blue"><a href="mailto:thirteen.with.u@gmail.com">thirteen.with.u@gmail.com</a></font> </p>
+      </div>
+  </footer>
+    </div>
+</body>
+
+</html>

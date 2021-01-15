@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+ 
+
+  <title>景點目錄 ｜ THIRTEEN </title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="statics/css/bootstrap.min.css" rel="stylesheet">
+  <link href="statics/icon/favicon.ico" type="image/x-icon" rel="icon">
+  <link href="statics/icon/favicon.ico" type="image/x-icon" rel="shortcut icon">
+
+
+  <style>
+    .bd-placeholder-img {
+      font-size: 1.125rem;
+      text-anchor: middle;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    @media (min-width: 768px) {
+      .bd-placeholder-img-lg {
+        font-size: 3.5rem;
+      }
+    }
+    .bodybg{
+		background-image: url('statics/img/Caribbean-beach.jpg')
+	}
+    
+	
+  </style>
+  <!-- Custom styles for this template -->
+  <link href="statics/css/cruise.css" rel="stylesheet">
+  <link href="statics/css/cruise2.css" rel="stylesheet">
+  <script type="text/javascript" src="statics/js/snowstorm.js"></script>
+  <script src="statics/js/jquery-3.4.1.min.js"></script>
+
+</head>
+
+<body class="bodybg">
+  <div class="d-flex upper-color flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 border-bottom shadow-sm">
+    <h3 class="my-0 mr-md-auto font-weight-bold "><a class="font-color" href="index.html" style="text-decoration: none">THIRTEEN</a></h3>
+    <nav class="my-2 my-md-0 mr-md-3">
+      <a class="p-2 text-dark" href="member.html">會員清單</a> 
+      <a class="p-2 text-dark" href="cruises.html">郵輪行程</a>
+      <a class="p-2 text-dark" href="spots.html">景點</a>
+      <a class="p-2 text-dark" href="order.html">訂單</a>
+    </nav>
+    <a class="btn cart-color btn-outline-primary" href="cart.html">購物車</a>
+  </div>
+
+  <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-5" style="font-size:50px;">景點目錄</h1>
+  </div>
+
+  <div id="f_panel" class="search" style="padding: 20px; margin-bottom:30px;" align="center">  <!--下拉式選單設定-->
+  	<form name="表單" onsubmit="getSpotsList(); return false">  <!--onsubmit時觸發getSpotslist()-->
+  		<select id = "stop_port_id" name="stop_port_id" style="height:45px; width: 500px">
+		</select>
+		<input id="submit" type="submit" style="height:45px" value="搜尋">
+	</form> 
+  </div>
+  
+  <div class="album py-5 bg-blue">
+    <div class="container">
+      <div id="spot_panel" class="row">
+      </div>
+    </div>
+  </div>
+
+  <script>   
+  getAllStopPorts();  //140 (放置下拉式選單)
+  
+  $(document).ready(function () {
+        if(window.location.href.indexOf("stop_port_id") <= -1) {   //還沒點進詳細資料
+        	getAllSpots();  //115 得到所有景點塞到panel
+        }
+        
+    });
+    
+    function getSpotsList() {   //下拉式選單搜尋觸發
+    	var e = document.getElementById("stop_port_id");
+    	var sp_id = e.options[e.selectedIndex].value;
+      $.ajax({   
+        type: "GET",
+        url: "api/spot.do",  //對應到spotcontroller的doGet
+        crossDomain: true,
+        cache: false,
+        data: "stop_port_id=" + sp_id,
+        dataType: 'json',
+        timeout: 5000,
+        success: function (response) { //成功得到doGet的response(spotcontroller 61行) 
+          if (response.status == 200) {
+        	  $("#spot_panel").empty();
+        	  var site_panel = '';
+        	
+        	$.each(response.response.data, function (){
+        		site_panel += addSpot(this); //171定義
+        	})
+        	
+        	$("#spot_panel").append(site_panel);
+          }
+        },
+        error: function () {
+          alert("無法連線到伺服器！");
+        }
+      });
+    }
+    
+    function getAllSpots() {  //得到所有景點塞到panel
+      $.ajax({
+        type: "GET",
+        url: "api/spot.do",  //對應到spotcontroller的doGet
+        crossDomain: true,
+        cache: false,
+        dataType: 'json',
+        timeout: 5000,
+        success: function (response) { //成功得到doGet的response(spotcontroller 61行)
+          if (response.status == 200) {
+        	var site_panel = '';
+ 
+        	$.each(response.response.data, function (){
+        		site_panel += addSpot(this); //171定義 
+        	})
+        	
+        	$("#spot_panel").append(site_panel);
+          }
+        },
+        error: function () {
+          alert("無法連線到伺服器！");
+        }
+      });
+    }
+    
+    function getAllStopPorts() {  //下拉式選單設定
+        $.ajax({
+          type: "GET",
+          url: "api/stopPort.do",  //對應到stopPortcontroller的doGet
+          crossDomain: true,
+          cache: false,
+          dataType: 'json',
+          timeout: 5000,
+          success: function (response) { //成功得到doGet的response(stopportcontroller 41行)
+            if (response.status == 200) {
+            	jQuery('#stop_port_id').append(jQuery("<option selected disabled></option>").text("選擇想去的地區吧"))
+   
+          	$.each(response.response.data, function (){
+          		jQuery('#stop_port_id').append(jQuery("<option></option>").val(this.id).text(this.name))
+          	})
+          	
+          	}
+          },
+          error: function () {
+            alert("無法連線到伺服器！");
+          }
+        });
+      }
+    
+  //  function addform(){
+  //  	let mid_html = ''; ////加return false讓網頁不refresh，只改變清單內容
+  //      mid_html += '<option value="'+ data.id +'">'+ data.name +'</option>';
+  //  	return mid_html;    
+  //  }
+
+    
+    function addSpot(data) {   //景點panel呈現
+    	let inner_html = '';
+    	inner_html += '<div class="col-md-4 padding-0" > <a style="text-decoration: none" href="status.html?spotid='+data.id+'" >';
+   		inner_html += '<div class="card mb-4 shadow-sm" style="padding:5px">';
+   		inner_html += '<h4 class="font-weight-normal text-center text-truncate">' + data.name + '</h4>';
+ 		inner_html += '<img src="statics/img/product/' + data.image + '" width="100%" height="250">';
+		inner_html += '</div></a></div>';
+		return inner_html;
+		
+    }
+  </script>
+
+  <footer>
+    <div class="container">
+      <p class="float-right">
+        <a href="#">Back to top</a>
+      </p>
+    	 <p>Thank you for visiting our web site!</p>
+         <p>Contact us: <font color="blue"><a href="mailto:thirteen.with.u@gmail.com">thirteen.with.u@gmail.com</a></font> </p>
+    
+      </div>
+  </footer>
+</body>
+
+</html>

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+
+
+  <title>郵輪行程列表 ｜ THIRTEEN旅遊 </title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="statics/css/bootstrap.min.css" rel="stylesheet">
+  <link href="statics/icon/favicon.ico" type="image/x-icon" rel="icon">
+  <link href="statics/icon/favicon.ico" type="image/x-icon" rel="shortcut icon">
+
+
+  <style>
+    .bd-placeholder-img {
+      font-size: 1.125rem;
+      text-anchor: middle;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    @media (min-width: 768px) {
+      .bd-placeholder-img-lg {
+        font-size: 3.5rem;
+      }
+    }
+    
+    .upper-color{
+    	background-color: #FFDAB9;
+    }
+    
+    .cart-color{
+    	background-color: #FFFFFF;
+    }
+    
+    .image-container {
+  		height:460px ;
+  		display: flex;
+  		width: 1100px;
+  		margin: 1em auto;
+  		justify-content: center;
+  		overflow: hidden;
+  		padding-right:0;
+    	padding-left:0;
+	}
+	
+    .font-color{
+    	color: #2828FF;
+    }
+    .p-2{
+		font-size: 20px;
+		font-weight:normal;
+	}
+	
+	.btn{
+		font-size: 20px;
+	}
+  </style>
+  <!-- Custom styles for this template -->
+  <link href="statics/css/cruise.css" rel="stylesheet">
+  <script type="text/javascript" src="statics/js/snowstorm.js"></script>
+  <script src="statics/js/jquery-3.4.1.min.js"></script>
+</head>
+
+<body>
+  <div class="d-flex upper-color flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 border-bottom shadow-sm">
+    <h3 class="my-0 mr-md-auto font-weight-bold "><a class="font-color" href="index.html" style="text-decoration: none">THIRTEEN旅遊</a></h3>
+    <nav class="my-2 my-md-0 mr-md-3">
+      <a class="p-2 text-dark" href="member.html">會員清單</a> 
+      <a class="p-2 text-dark" href="cruises.html">郵輪行程</a>
+      <a class="p-2 text-dark" href="spots.html">景點</a>
+      <a class="p-2 text-dark" href="order.html">訂單</a>
+    </nav>
+    <a class="btn cart-color btn-outline-primary" href="cart.html">購物車</a>
+  </div>
+
+  <div class="container">
+      <div id="cruise_panel" class="panel">
+      </div>
+  </div>
+
+  <script>
+	var id = window.location.toString().split('=')[1]
+ 	
+ 	$(document).ready(function () {
+        if(window.location.href.indexOf("cruise") > -1) {
+        	getSingleCruise();
+        }
+        else {
+        	getSingleSpot();
+        }
+    });
+    
+    function getSingleCruise() {
+        $.ajax({
+          type: "GET",
+          url: "api/cruise.do",  //對應到cruisescontroller的doGet
+          crossDomain: true,
+          cache: false,
+          data: "id=" + id,
+          dataType: 'json',
+          timeout: 5000,
+          success: function (response) { //成功得到doGet的response(cruisescontroller 55行)
+            if (response.status == 200) {
+          	var cr_panel = '';
+          	
+          	$.each(response.response.data, function (){
+          		cr_panel += '<br><a href="index.html">HOME</a> > <a href="cruises.html">郵輪行程目錄</a> > '+this.name+'';
+              	cr_panel += addItem(this); //156定義
+          	})
+          	
+          	$("#cruise_panel").append(cr_panel);
+            }
+          },
+          error: function () {
+            alert("無法連線到伺服器！");
+          }
+        });
+      }
+ 	
+ 	function getSingleSpot() {
+        $.ajax({
+          type: "GET",
+          url: "api/spot.do",  //對應到spotcontroller的doGet
+          crossDomain: true,
+          cache: false,
+          data: "id=" + id,
+          dataType: 'json',
+          timeout: 5000,
+          success: function (response) { //成功得到doGet的response(spotcontroller 47行)
+            if (response.status == 200) {
+          	var cr_panel = '';
+          	  	
+          	$.each(response.response.data, function (){
+          		cr_panel += '<br><a href="index.html">HOME</a> > <a href="spots.html">景點目錄</a> > '+this.name+'';
+          		cr_panel += addItem(this); //156定義
+          	})
+          	
+          	$("#cruise_panel").append(cr_panel);
+            }
+          },
+          error: function () {
+            alert("無法連線到伺服器！");
+          }
+        });
+      }
+
+ 		
+      
+      function addItem(data) {
+      	let inner_html = '';
+      	inner_html += '<div id="panel" class="image-container">';
+      	inner_html += '<img src="statics/img/product/' + data.image + '" height="600px" width="1100px">';
+   		inner_html += '</div><div><h1>' + data.name + '</h1>';
+  		inner_html += '</div>';
+  		inner_html += '<div class="article" style="margin:0; padding:80px; ">';
+  		inner_html += '<p style="line-height:3; font-size:20px;">' + data.describe + ' </p></div>';
+  		return inner_html;
+  		
+      }
+      
+      
+ 
+  </script>
+
+  <footer>
+    <div class="container">
+      <p class="float-right">
+        <a href="#">Back to top</a>
+      </p>
+    	 <p>Thank you for visiting our web site!</p>
+         <p>Contact us: <font color="blue"><a href="mailto:thirteen.with.u@gmail.com">thirteen.with.u@gmail.com</a></font> </p>
+      </div>
+  </footer>
+</body>
+
+</html>

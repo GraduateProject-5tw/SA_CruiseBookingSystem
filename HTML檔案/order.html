@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+  <meta name="generator" content="Jekyll v3.8.5">
+
+  <title>訂單列表 ｜ THIRTEEN旅遊</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="statics/css/bootstrap.min.css" rel="stylesheet">
+  <link href="statics/css/font-awesome.min.css" rel="stylesheet">
+  <link href="statics/icon/favicon.ico" type="image/x-icon" rel="icon">
+  <link href="statics/icon/favicon.ico" type="image/x-icon" rel="shortcut icon">
+
+
+  <style>
+    .bd-placeholder-img {
+      font-size: 1.125rem;
+      text-anchor: middle;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+	.bodybg{
+		background-image: url('statics/img/Caribbean-beach.jpg')
+	}
+    @media (min-width: 768px) {
+      .bd-placeholder-img-lg {
+        font-size: 3.5rem;
+      }
+    } 
+    .upper-color{
+    	background-color: #FFDAB9;
+    }
+    
+	.cart-color{
+    	background-color: #FFFFFF;
+    }
+    .font-color{
+    	color: #2828FF;
+    }
+    .p-2{
+		font-size: 20px;
+		font-weight:normal;
+	}
+	
+	.btn{
+		font-size: 20px;
+	}
+  </style>
+  <!-- Custom styles for this template -->
+  <link href="statics/css/product.css" rel="stylesheet">
+  <link href="statics/css/jquery-confirm.css" rel="stylesheet">
+  <script type="text/javascript" src="statics/js/snowstorm.js"></script>
+  <script src="statics/js/jquery-3.4.1.min.js"></script>
+  <script src="statics/js/jquery-confirm.js"></script>
+  <script src="statics/js/big.min.js"></script>
+  <script type="text/javascript">
+    	if (document.cookie.indexOf('memberlogin=valid') < 0) {
+    		alert("請先登入會員！");
+    		location.href = "login.html"; //If user has not authenticated, sent back to this page
+    	}
+    	
+  </script>
+</head>
+
+<body class="bodybg">
+  <div class="d-flex upper-color flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 border-bottom shadow-sm">
+    <h3 class="my-0 mr-md-auto font-weight-bold "><a class="font-color" href="index.html" style="text-decoration: none">THIRTEEN旅遊</a></h3>
+    <nav class="my-2 my-md-0 mr-md-3">
+      <a class="p-2 text-dark" href="member.html">會員清單</a> 
+      <a class="p-2 text-dark" href="cruises.html">郵輪行程</a>
+      <a class="p-2 text-dark" href="spots.html">景點</a>
+      <a class="p-2 text-dark" href="order.html">訂單</a>
+    </nav>
+    <a class="btn cart-color btn-outline-primary" href="cart.html">購物車</a>
+  </div>
+
+  <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center bg-light">
+    <h1 class="display-4">訂單列表</h1>
+    <p class="lead">以下是目前所存在之所有訂單</p>
+  </div>
+
+  <div class="container">
+	  <div class="py-5">
+	  	<div class='row'>
+		  	<div id='order_panel' class="row mb-2">
+        </div>
+      </div>
+	  </div>
+  </div>
+
+  <script>
+  
+  function getAllOrderData() {
+	  $.ajax({
+          type: "GET",
+          url: "api/order.do",
+          crossDomain: true,
+          cache: false,
+          dataType: 'json',
+          timeout: 5000,
+          success: function (response) {
+              if(response.status == 200){
+            	  updateHTML(response.response.data);
+              }
+              console.log(response);
+          },
+          error: function () {
+              alert("無法連線到伺服器！");
+          }
+    });
+  }
+  
+  getAllOrderData();
+  
+  function deleteOrder(id) {  
+      var check = window.confirm("確認刪除訂單？");  //提示彈出
+      if (check == true) {   
+          console.log("You pressed OK!");
+          var request = {'id': id};
+          var data_string = JSON.stringify(request);  //把上一行request轉成JSON
+          $.ajax({   
+              type: "DELETE",
+              url: "api/order.do",  //Ordercontroller的doDelete
+              crossDomain: true,
+              data: data_string,
+              cache: false,
+              dataType: 'json',
+              timeout: 5000,
+              success: function (response) {
+                  if(response.status == 200){
+                      $("#flashMessage").html("成功! 已經成功刪除此筆訂單...");
+                      $("#flashMessage").show();
+                      window.location.reload(true);
+                  }
+                  console.log(response);
+              },
+              error: function () {
+                  alert("無法連線到伺服器！");
+              }
+          });
+      }
+      else {
+          console.log("You pressed Cancel!");
+      }
+  }
+  
+  function updateHTML(data) {
+	  var inner_html = '';
+	  var temp = '';
+	  
+	  $.each(data, function (key, value) {
+		  var total_price = Big(0.0);
+		  $.each(value['cruise_info'], function (k, v) {
+			  total_price = total_price.plus(v['subtotal'])
+		  });
+		  
+		  temp = '<div class="col-md-6">';
+		  temp += '<div class="row no-gutters border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">';
+		  temp += '<div class="col p-4 d-flex flex-column position-static">';
+		  temp += '<strong class="d-inline-block mb-2 text-primary">訂單編號：#' + value['order_info']['id'] + '</strong>';
+		  temp += '<h3 class="mb-0"><span class="p-2">' + value['order_info']['name'] + '</span></h3>';
+		  temp += '<hr/>';
+		  temp += '<div class="mb-1 text-muted">建立時間：' + value['order_info']['create'] + '</div>';
+		  temp += '<div class="mb-1 text-muted">修改時間：' + value['order_info']['modify'] + '</div>';
+		  temp += '<p class="card-text mb-auto">總價：$ ' + total_price + '</p>';
+		  temp += '<a href="order_detail.html?id=' + value['order_info']['id'] + '" >詳細資料</a>';
+		  temp += '<a href="javascript: deleteOrder(' + value['order_info']['id'] + ');">刪除</a></td></tr>';		  
+		  temp += '</div></div></div>';
+		  inner_html = temp + inner_html;
+	  });
+	  
+	  $('#order_panel').append(inner_html);
+	  
+  }
+  </script>
+
+  <footer>
+    <div class="container">
+      <p class="float-right">
+        <a href="#">Back to top</a>
+      </p>
+    	 <p>Thank you for visiting our web site!</p>
+         <p>Contact us: <font color="blue"><a href="mailto:thirteen.with.u@gmail.com">thirteen.with.u@gmail.com</a></font> </p>
+      </div>
+  </footer>
+</body>
+
+</html>

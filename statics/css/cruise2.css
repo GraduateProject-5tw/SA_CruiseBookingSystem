@@ -1,0 +1,28 @@
+.upper-color{
+    	background-color: #FFDAB9;
+    }
+    
+    .cart-color{
+    	background-color: #FFFFFF;
+    }
+    
+    .padding-0{
+    padding-right:0;
+    padding-left:0;
+	}
+	
+	a {
+    color: #414141;
+	}
+	
+	.font-color{
+    	color: #2828FF;
+    }
+    .p-2{
+		font-size: 20px;
+		font-weight:normal;
+	}
+	
+	.btn{
+		font-size: 20px;
+	}
